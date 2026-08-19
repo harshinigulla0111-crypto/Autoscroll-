@@ -1,0 +1,142 @@
+{
+  "dataset": [
+    {
+      "wordCount": 300,
+      "charCount": 1600,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 220,
+      "targetWpm": 225
+    },
+    {
+      "wordCount": 150,
+      "charCount": 950,
+      "fontSize": 14,
+      "contentType": "chatbot",
+      "userBaselineWpm": 220,
+      "targetWpm": 180
+    },
+    {
+      "wordCount": 500,
+      "charCount": 2700,
+      "fontSize": 18,
+      "contentType": "book",
+      "userBaselineWpm": 220,
+      "targetWpm": 255
+    },
+    {
+      "wordCount": 250,
+      "charCount": 1400,
+      "fontSize": 16,
+      "contentType": "news",
+      "userBaselineWpm": 220,
+      "targetWpm": 230
+    },
+    {
+      "wordCount": 400,
+      "charCount": 2100,
+      "fontSize": 20,
+      "contentType": "blog",
+      "userBaselineWpm": 200,
+      "targetWpm": 195
+    },
+    {
+      "wordCount": 200,
+      "charCount": 1300,
+      "fontSize": 14,
+      "contentType": "chatbot",
+      "userBaselineWpm": 200,
+      "targetWpm": 160
+    },
+    {
+      "wordCount": 600,
+      "charCount": 3200,
+      "fontSize": 18,
+      "contentType": "book",
+      "userBaselineWpm": 250,
+      "targetWpm": 285
+    },
+    {
+      "wordCount": 350,
+      "charCount": 1900,
+      "fontSize": 16,
+      "contentType": "news",
+      "userBaselineWpm": 250,
+      "targetWpm": 260
+    },
+    {
+      "wordCount": 280,
+      "charCount": 1500,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 240,
+      "targetWpm": 245
+    },
+    {
+      "wordCount": 180,
+      "charCount": 1100,
+      "fontSize": 14,
+      "contentType": "chatbot",
+      "userBaselineWpm": 240,
+      "targetWpm": 198
+    },
+    {
+      "wordCount": 300,
+      "charCount": 1600,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 220,
+      "targetWpm": 220
+    },
+    {
+      "wordCount": 300,
+      "charCount": 1600,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 220,
+      "targetWpm": 220
+    },
+    {
+      "wordCount": 250,
+      "charCount": 1350,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 286,
+      "targetWpm": 286
+    },
+    {
+      "wordCount": 300,
+      "charCount": 1600,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 286,
+      "targetWpm": 220
+    },
+    {
+      "wordCount": 300,
+      "charCount": 1600,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 286,
+      "targetWpm": 286
+    },
+    {
+      "wordCount": 250,
+      "charCount": 1350,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 301,
+      "targetWpm": 301
+    }
+  ],
+  "weights": {
+    "intercept": 47,
+    "wBaseline": 0.9447470448799612,
+    "wFont": 1,
+    "wDensity": -10,
+    "wContent": 25
+  },
+  "userBaselineWpm": 301,
+  "rSquared": 0.72,
+  "lastTrainedAt": "2026-08-04T17:45:21.337Z"
+}

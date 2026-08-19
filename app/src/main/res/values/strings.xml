@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AutoScroll AI</string>
+    <string name="accessibility_service_label">AutoScroll Universal Reading Assistant</string>
+    <string name="accessibility_service_description">AutoScroll uses Android Accessibility Service to detect readable and scrollable content in supported applications and control scrolling when you activate AutoScroll.</string>
+    <string name="overlay_service_label">AutoScroll Floating Overlay Controls</string>
+    <string name="quick_settings_tile_label">AutoScroll</string>
+    <string name="notification_channel_name">AutoScroll Reading Service</string>
+    <string name="notification_channel_desc">Active foreground service notification for Universal AutoScroll</string>
+</resources>

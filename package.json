@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "autoscroll-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AutoScroll application root workspace launcher",
+  "scripts": {
+    "dev": "node scripts/start-dev.js",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "start": "node scripts/start-dev.js",
+    "build": "npm run build --prefix frontend",
+    "build:apk": "python scripts/generate_apk.py",
+    "share": "node scripts/share-tunnel.js"
+  }
+}
