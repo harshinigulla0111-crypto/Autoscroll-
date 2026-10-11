@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '../data');
+const SEED_DATA_FILE = path.join(__dirname, '../data/ml_data.json');
+const DATA_DIR = process.env.VERCEL ? path.join('/tmp', 'data') : path.join(__dirname, '../data');
 const DATA_FILE = path.join(DATA_DIR, 'ml_data.json');
 
 // Content Type Mapping for ML features
@@ -50,8 +51,9 @@ class MLReadingEngine {
         fs.mkdirSync(DATA_DIR, { recursive: true });
       }
 
-      if (fs.existsSync(DATA_FILE)) {
-        const fileContent = fs.readFileSync(DATA_FILE, 'utf8');
+      const activeFile = fs.existsSync(DATA_FILE) ? DATA_FILE : (fs.existsSync(SEED_DATA_FILE) ? SEED_DATA_FILE : null);
+      if (activeFile) {
+        const fileContent = fs.readFileSync(activeFile, 'utf8');
         const parsed = JSON.parse(fileContent);
         this.dataset = parsed.dataset || DEFAULT_SEED_DATA;
         this.weights = parsed.weights || this.weights;

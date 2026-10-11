@@ -48,12 +48,26 @@ export function loadMLProfile() {
 }
 
 /**
- * Save updated profile locally
+ * Save updated profile locally and attempt backend API sync
  */
 export function saveMLProfile(profile) {
   try {
     const updated = { ...profile, lastUpdated: new Date().toISOString() };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+
+    // Optional background sync to server API
+    if (typeof fetch !== 'undefined') {
+      fetch('/api/calibration/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          baselineWpm: updated.userBaselineWpm,
+          confidencePercent: updated.confidencePercent,
+          categoryWpmMap: updated.categoryWpmMap
+        })
+      }).catch(() => {});
+    }
+
     return updated;
   } catch (err) {
     console.warn('Failed to save on-device ML profile:', err);
@@ -157,6 +171,22 @@ export function updateOnDeviceModel({ sessionWpm, manualAdjustments = 0, reversa
   
   if (profile.learningHistory.length > 20) {
     profile.learningHistory = profile.learningHistory.slice(0, 20);
+  }
+
+  // Background sync to backend ML engine
+  if (typeof fetch !== 'undefined') {
+    fetch('/api/ml/train', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        wordCount: 300,
+        charCount: 1500,
+        fontSize: 18,
+        contentType: category,
+        targetWpm: sessionWpm,
+        userBaselineWpm: profile.userBaselineWpm
+      })
+    }).catch(() => {});
   }
 
   const saved = saveMLProfile(profile);

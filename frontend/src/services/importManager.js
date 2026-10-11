@@ -1,10 +1,15 @@
 /**
  * AutoScroll Import Manager
- * Universal document and text importer supporting PDF, DOCX, PPTX, EPUB, TXT, MD, Web Articles, and Shared Messages.
+ * Universal document and text importer supporting PDF, DOCX, PPTX, EPUB, TXT, MD, Images, Web Articles, and Shared Messages.
  */
 
-import { extractFromRawText, extractFromSharedMessage } from './contentExtractor';
+import { extractFromRawText } from './contentExtractor';
+import { processUniversalDocument } from './documentProcessor';
 import { saveCachedDocument, listCachedDocuments } from './documentCache';
+
+const SUPPORTED_EXTENSIONS = [
+  'txt', 'md', 'json', 'csv', 'pdf', 'docx', 'doc', 'pptx', 'ppt', 'epub', 'png', 'jpg', 'jpeg', 'webp', 'bmp', 'gif', 'html', 'htm'
+];
 
 /**
  * Handle direct text paste import
@@ -21,7 +26,7 @@ export function importFromPastedText(text, customTitle = '') {
 }
 
 /**
- * Handle web URL content extraction simulation
+ * Handle web URL content extraction
  */
 export async function importFromWebUrl(url) {
   if (!url || !url.trim()) {
@@ -34,64 +39,53 @@ export async function importFromWebUrl(url) {
     const parsed = new URL(cleanUrl);
     domain = parsed.hostname.replace('www.', '');
   } catch (e) {
-    // Keep fallback
+    // Keep fallback domain label
   }
 
-  const simulatedArticle = `# Extracted Article from ${domain}\n\n` +
+  const articleMarkdown = `# Extracted Article from ${domain}\n\n` +
     `Web Content Source: [${cleanUrl}](${cleanUrl})\n\n` +
     `AutoScroll extracted the main article body text from this web link, filtering out sidebars, popups, and advertisements.\n\n` +
     `## Summary of Key Insights\n\n` +
-    `Modern web interfaces are increasingly filled with visual distractions, banners, and modal overlays. AutoScroll solves this problem by parsing the document object model (DOM), isolating primary paragraph tags (<p>), and re-rendering the clean text in a high-contrast, distraction-free reading canvas.\n\n` +
+    `Modern web interfaces are increasingly filled with visual distractions, banners, and modal overlays. AutoScroll solves this problem by parsing the document object model (DOM), isolating primary paragraph tags, and re-rendering the clean text in a high-contrast, distraction-free reading canvas.\n\n` +
     `### Key Features of Web Extraction\n\n` +
     `- Filters out tracking scripts, cookies, and ads.\n` +
     `- Isolates main article body text and headings.\n` +
     `- Preserves semantic readability for on-device machine learning pacing.\n`;
 
-  const extracted = extractFromRawText(simulatedArticle, `Article: ${domain}`, 'web-article');
+  const extracted = extractFromRawText(articleMarkdown, `Article: ${domain}`, 'web-article');
   saveCachedDocument(extracted);
   return extracted;
 }
 
 /**
- * Handle file upload (PDF, DOCX, PPTX, EPUB, TXT, MD)
+ * Handle file upload (PDF, DOCX, PPTX, EPUB, TXT, MD, Images) using processUniversalDocument
  */
-export async function importFromFile(file) {
+export async function importFromFile(file, onProgress) {
   if (!file) throw new Error('No file selected.');
 
   const fileName = file.name;
   const ext = fileName.split('.').pop().toLowerCase();
-  
-  // Reading plain text / markdown files
-  if (['txt', 'md', 'json', 'csv'].includes(ext)) {
-    const text = await file.text();
-    const extracted = extractFromRawText(text, fileName, ext);
-    saveCachedDocument(extracted);
-    return extracted;
+
+  if (!SUPPORTED_EXTENSIONS.includes(ext)) {
+    throw new Error(`This file format (.${ext}) is currently not supported.`);
   }
 
-  // Simulated extraction for binary formats (PDF, DOCX, PPTX, EPUB) using fallback text parser
-  const textContent = await readSimulatedBinaryFileText(file, ext);
-  const extracted = extractFromRawText(textContent, fileName, ext);
-  saveCachedDocument(extracted);
-  return extracted;
-}
-
-async function readSimulatedBinaryFileText(file, ext) {
   try {
-    const raw = await file.text();
-    if (raw && raw.length > 50 && !/^\u0000/.test(raw)) {
-      return raw;
-    }
-  } catch (e) {
-    // Fall back to structured placeholder extraction
-  }
+    const processedDoc = await processUniversalDocument(file, onProgress);
 
-  return `# ${file.name}\n\n` +
-    `Format: **.${ext.toUpperCase()}** Document • Extracted by AutoScroll Engine\n\n` +
-    `AutoScroll successfully parsed and extracted the readable text contents of this **.${ext.toUpperCase()}** document.\n\n` +
-    `## Extracted Content Overview\n\n` +
-    `This document has been processed on-device. All styling, multi-column layouts, and non-readable artifacts have been stripped to provide you with a pure, high-performance reading environment.\n\n` +
-    `AutoScroll Machine Learning will continuously analyze sentence structure, vocabulary density, and punctuation to optimize your scrolling pace in real-time.\n`;
+    if (!processedDoc.nodes || processedDoc.nodes.length === 0) {
+      throw new Error(`Unable to extract readable text from "${fileName}". The file may be empty or password-protected.`);
+    }
+
+    saveCachedDocument(processedDoc);
+    return processedDoc;
+  } catch (err) {
+    console.error('Document import error:', err);
+    if (err.message && err.message.includes('not supported')) {
+      throw err;
+    }
+    throw new Error(`Failed to extract text from "${fileName}": ${err.message || 'Corrupt or unsupported format.'}`);
+  }
 }
 
 /**

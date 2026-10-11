@@ -8,6 +8,8 @@ import UploadModal from './components/UploadModal';
 import DownloadApkModal from './components/DownloadApkModal';
 import UniversalAutoScrollCard from './components/UniversalAutoScrollCard';
 import SettingsModal from './components/SettingsModal';
+import AuthModal from './components/AuthModal';
+import { authService } from './services/authService';
 import { loadMLProfile, saveMLProfile } from './services/onDeviceML';
 import { SAMPLE_UNIVERSAL_DOCS } from './services/contentExtractor';
 import { loadUniversalAutoScrollState, saveUniversalAutoScrollState } from './services/activeAppManager';
@@ -22,6 +24,10 @@ export default function App() {
   const [universalState, setUniversalState] = useState(loadUniversalAutoScrollState());
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [overlayConfig, setOverlayConfig] = useState(loadOverlayConfig());
+
+  // User Authentication State
+  const [user, setUser] = useState(authService.getUser());
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   // Active document being read
   const [activeDocument, setActiveDocument] = useState(SAMPLE_UNIVERSAL_DOCS[0]);
@@ -47,6 +53,13 @@ export default function App() {
     return () => {
       if (breakEngineRef.current) breakEngineRef.current.stop();
     };
+  }, []);
+
+  // Fetch current user on startup
+  useEffect(() => {
+    authService.getCurrentUser().then(u => {
+      if (u) setUser(u);
+    });
   }, []);
 
   // Check if onboarding needs to be shown on first open
@@ -148,6 +161,8 @@ export default function App() {
         isUniversalEnabled={universalState.isUniversalEnabled}
         onResetOnboarding={handleResetOnboarding}
         onOpenDownloadApk={() => setIsDownloadApkOpen(true)}
+        user={user}
+        onOpenAuth={() => setIsAuthOpen(true)}
       />
 
       {/* Main Content Body */}
@@ -236,6 +251,16 @@ export default function App() {
         isOpen={isDownloadApkOpen}
         onClose={() => setIsDownloadApkOpen(false)}
       />
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        user={user}
+        onAuthChange={(u) => setUser(u)}
+        onTriggerNotif={(notif) => setNotification(notif)}
+      />
     </div>
   );
 }
+

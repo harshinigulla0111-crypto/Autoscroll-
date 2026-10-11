@@ -45,6 +45,10 @@ export default function AutoScrollReader({
   const containerRef = useRef(null);
   const engineRef = useRef(null);
 
+  // Tap gesture refs for Single-Tap Pause & Double-Tap Resume
+  const lastTapRef = useRef(0);
+  const clickTimerRef = useRef(null);
+
   // Initialize SmoothScrollEngine
   useEffect(() => {
     engineRef.current = new SmoothScrollEngine({
@@ -116,6 +120,39 @@ export default function AutoScrollReader({
 
   const handleUserInteract = () => {
     if (engineRef.current) engineRef.current.userInteracted();
+  };
+
+  // Single Tap = Pause; Double Tap = Resume from exact position
+  const handleCanvasClick = (e) => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 280;
+
+    if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // Double tap -> Resume AutoScroll from exact current position
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+      if (engineRef.current && !isScrolling) {
+        engineRef.current.start();
+      }
+    } else {
+      // Single tap -> Pause AutoScroll or reveal minimal controls
+      clickTimerRef.current = setTimeout(() => {
+        if (engineRef.current) {
+          if (isScrolling) {
+            engineRef.current.pause();
+          } else {
+            engineRef.current.userInteracted();
+          }
+        }
+      }, DOUBLE_TAP_DELAY);
+    }
+    lastTapRef.current = now;
+  };
+
+  // Manual scroll detection handler
+  const handleContainerScroll = () => {
+    if (engineRef.current) {
+      engineRef.current.userScrolled();
+    }
   };
 
   const activeTheme = THEME_PRESETS[overlayConfig.themeId.toUpperCase().replace('-', '_')] || THEME_PRESETS.GLASS_DARK;
@@ -258,6 +295,7 @@ export default function AutoScrollReader({
 
       {/* PURE DISTRACTION-FREE READING CANVAS */}
       <div 
+        onClick={handleCanvasClick}
         style={{
           position: 'relative',
           padding: '44px',
@@ -266,11 +304,13 @@ export default function AutoScrollReader({
           backdropFilter: `blur(${activeTheme.blurPx}px)`,
           WebkitBackdropFilter: `blur(${activeTheme.blurPx}px)`,
           border: '1px solid rgba(255, 255, 255, 0.12)',
-          boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
+          boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+          cursor: 'pointer'
         }}
       >
         <div
           ref={containerRef}
+          onScroll={handleContainerScroll}
           style={{
             height: '520px',
             overflowY: 'auto',

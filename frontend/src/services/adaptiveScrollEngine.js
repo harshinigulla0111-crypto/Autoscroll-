@@ -133,6 +133,42 @@ export class SmoothScrollEngine {
     this.resetAutoFadeTimer();
   }
 
+  // Handle manual user scrolling (pause auto-scroll, sync reading position)
+  userScrolled() {
+    this.userInteracted();
+    
+    // Recalculate active node index based on current scroll position
+    const container = this.containerRef.current;
+    if (container && this.nodes.length > 0) {
+      const containerRect = container.getBoundingClientRect();
+      const focusPointY = containerRect.top + (containerRect.height * 0.25);
+      const children = Array.from(container.children);
+      
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        const rect = child.getBoundingClientRect();
+        if (rect.top <= focusPointY && rect.bottom >= focusPointY) {
+          this.activeNodeIndex = i;
+          break;
+        }
+      }
+
+      // Update progress telemetry
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const progressPercent = scrollHeight > clientHeight ? Math.round((scrollTop / (scrollHeight - clientHeight)) * 100) : 100;
+      if (this.onProgressUpdate) {
+        this.onProgressUpdate({
+          scrollTop,
+          scrollHeight,
+          clientHeight,
+          progressPercent,
+          currentVelocityPxSec: Math.round(this.currentVelocityPxSec),
+          activeNode: this.nodes[this.activeNodeIndex] || null
+        });
+      }
+    }
+  }
+
   resetAutoFadeTimer() {
     if (this.autoFadeTimer) clearTimeout(this.autoFadeTimer);
     if (!this.isScrolling) return;

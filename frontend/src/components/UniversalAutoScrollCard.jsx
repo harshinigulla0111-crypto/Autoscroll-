@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Smartphone, Shield, Settings, Zap, CheckCircle2, AlertTriangle, 
-  ExternalLink, Layers, Copy, Share2, FileText, Sparkles, MessageSquare, Globe, BookOpen
+  ExternalLink, Layers, Copy, Share2, FileText, Sparkles, MessageSquare, Globe, BookOpen, Download
 } from 'lucide-react';
 import { POPULAR_APP_REGISTRY } from '../services/appCapabilityManager';
-import { AndroidNativeContract } from '../native/nativeBridge';
+import { AndroidNativeContract, detectPlatform, PLATFORM_TYPES } from '../native/nativeBridge';
 
 export default function UniversalAutoScrollCard({
   isUniversalEnabled,
@@ -13,18 +13,30 @@ export default function UniversalAutoScrollCard({
   onLaunchReaderWithContent
 }) {
   const [selectedApp, setSelectedApp] = useState(POPULAR_APP_REGISTRY[0]); // WhatsApp
-  const [isAccessibilityGranted, setIsAccessibilityGranted] = useState(true);
-  const [isOverlayGranted, setIsOverlayGranted] = useState(true);
+  const [platform, setPlatform] = useState(detectPlatform());
+  const [isAccessibilityGranted, setIsAccessibilityGranted] = useState(false);
+  const [isOverlayGranted, setIsOverlayGranted] = useState(false);
   const [simulatedFallbackOpen, setSimulatedFallbackOpen] = useState(false);
+
+  // Check live device permissions
+  useEffect(() => {
+    async function checkPermissions() {
+      if (platform === PLATFORM_TYPES.ANDROID) {
+        const acc = await AndroidNativeContract.checkAccessibilityPermission();
+        const ovr = await AndroidNativeContract.checkOverlayPermission();
+        setIsAccessibilityGranted(acc);
+        setIsOverlayGranted(ovr);
+      }
+    }
+    checkPermissions();
+  }, [platform]);
 
   const handleGrantAccessibility = async () => {
     await AndroidNativeContract.requestAccessibilityPermission();
-    setIsAccessibilityGranted(true);
   };
 
   const handleGrantOverlay = async () => {
     await AndroidNativeContract.requestOverlayPermission();
-    setIsOverlayGranted(true);
   };
 
   return (
@@ -98,223 +110,180 @@ export default function UniversalAutoScrollCard({
         </button>
       </div>
 
-      {/* Grid: Permission Cards & Supported Apps */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+      {/* Distinction Section: Web Prototype vs Android Device Integration */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px', marginBottom: '24px' }}>
         
-        {/* System Permissions Card */}
-        <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', padding: '20px', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <h4 style={{ fontSize: '0.95rem', fontWeight: '800', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Shield size={18} color="#38bdf8" />
-            Android System Permissions
-          </h4>
+        {/* CARD 1: Web Prototype / Web Demo */}
+        <div style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', padding: '20px', borderRadius: '18px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '800', color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Web Demo & Dashboard
+            </span>
+            <span style={{ fontSize: '0.72rem', backgroundColor: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '2px 8px', borderRadius: '6px', fontWeight: '700' }}>
+              PROTOTYPE ACTIVE
+            </span>
+          </div>
+          <p style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5, marginBottom: '14px' }}>
+            The Web Dashboard demonstrates ML speed estimation, document extraction, floating controller UI, and adaptive pacing algorithms in your browser.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.78rem', color: '#94a3b8' }}>
+            <span style={{ color: '#4ade80' }}>✓ In-Browser Reading Canvas & ML Model</span>
+            <span style={{ color: '#4ade80' }}>✓ Multi-format Document Extractor</span>
+            <span style={{ color: '#4ade80' }}>✓ Glassmorphism Control Pill Preview</span>
+          </div>
+        </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-              <div>
-                <span style={{ fontWeight: '700' }}>Accessibility Service</span>
-                <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>Content scroll detection</p>
-              </div>
+        {/* CARD 2: Android Device Integration */}
+        <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', padding: '20px', borderRadius: '18px', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: '800', color: '#4ade80', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Android Device Integration
+            </span>
+            <span style={{
+              fontSize: '0.72rem',
+              backgroundColor: platform === PLATFORM_TYPES.ANDROID ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+              color: platform === PLATFORM_TYPES.ANDROID ? '#4ade80' : '#fbbf24',
+              padding: '2px 8px',
+              borderRadius: '6px',
+              fontWeight: '700'
+            }}>
+              {platform === PLATFORM_TYPES.ANDROID ? 'NATIVE ANDROID' : 'REQUIRES ANDROID APP'}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '14px', fontSize: '0.82rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Accessibility Service (System Scroll)</span>
               {isAccessibilityGranted ? (
-                <span style={{ color: '#4ade80', fontWeight: '800', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <CheckCircle2 size={14} /> GRANTED
-                </span>
+                <span style={{ color: '#4ade80', fontWeight: '800', fontSize: '0.75rem' }}>✓ GRANTED</span>
               ) : (
-                <button onClick={handleGrantAccessibility} style={{ padding: '4px 10px', borderRadius: '6px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer' }}>
-                  Enable
+                <button onClick={handleGrantAccessibility} style={{ padding: '3px 8px', borderRadius: '6px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer' }}>
+                  Setup
                 </button>
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-              <div>
-                <span style={{ fontWeight: '700' }}>Display Overlay</span>
-                <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>Floating reading control pill</p>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Display Overlay (Floating Controls)</span>
               {isOverlayGranted ? (
-                <span style={{ color: '#4ade80', fontWeight: '800', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <CheckCircle2 size={14} /> GRANTED
-                </span>
+                <span style={{ color: '#4ade80', fontWeight: '800', fontSize: '0.75rem' }}>✓ GRANTED</span>
               ) : (
-                <button onClick={handleGrantOverlay} style={{ padding: '4px 10px', borderRadius: '6px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer' }}>
-                  Enable
+                <button onClick={handleGrantOverlay} style={{ padding: '3px 8px', borderRadius: '6px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer' }}>
+                  Setup
                 </button>
               )}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-              <div>
-                <span style={{ fontWeight: '700' }}>Quick Settings Tile</span>
-                <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>System drop-down tile toggle</p>
-              </div>
-              <span style={{ color: '#a855f7', fontWeight: '800', fontSize: '0.78rem' }}>
-                READY IN TILE BAR
-              </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Quick Settings Tile Bar Toggle</span>
+              <span style={{ color: '#a855f7', fontWeight: '800', fontSize: '0.75rem' }}>AVAILABLE IN ANDROID APP</span>
             </div>
           </div>
-        </div>
 
-        {/* Third-Party App Compatibility Inspector */}
-        <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', padding: '20px', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <h4 style={{ fontSize: '0.95rem', fontWeight: '800', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Layers size={18} color="#a855f7" />
-            Tested Applications & Capability
-          </h4>
-
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
-            {POPULAR_APP_REGISTRY.slice(0, 5).map((app) => (
-              <button
-                key={app.packageName}
-                onClick={() => setSelectedApp(app)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  backgroundColor: selectedApp.packageName === app.packageName ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.04)',
-                  border: selectedApp.packageName === app.packageName ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
-                  color: selectedApp.packageName === app.packageName ? '#60a5fa' : '#94a3b8',
-                  fontSize: '0.78rem',
-                  fontWeight: '700',
-                  cursor: 'pointer'
-                }}
-              >
-                {app.appName}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-              <span style={{ fontSize: '0.88rem', fontWeight: '800' }}>{selectedApp.appName}</span>
-              <span style={{
-                fontSize: '0.68rem',
-                fontWeight: '800',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                backgroundColor: selectedApp.capability === 'FULL' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)',
-                color: selectedApp.capability === 'FULL' ? '#4ade80' : '#facc15'
-              }}>
-                {selectedApp.capability} CAPABILITY
-              </span>
-            </div>
-            <p style={{ fontSize: '0.78rem', color: '#cbd5e1', margin: '4px 0 8px 0' }}>
-              {selectedApp.notes}
-            </p>
-            <div style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'flex', gap: '12px' }}>
-              <span>Direct Scroll: <strong style={{ color: '#4ade80' }}>YES</strong></span>
-              <span>Text Highlight: <strong style={{ color: selectedApp.supportsTextExtract ? '#4ade80' : '#facc15' }}>{selectedApp.supportsTextExtract ? 'YES' : 'GESTURE'}</strong></span>
-            </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <a
+              href="/AutoScroll-v1.0.0.apk"
+              download="AutoScroll-v1.0.0.apk"
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#fff',
+                fontWeight: '700',
+                fontSize: '0.8rem',
+                textDecoration: 'none',
+                textAlign: 'center',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              <Download size={14} /> Download Native Android APK
+            </a>
           </div>
         </div>
 
       </div>
 
-      {/* Demonstration / Simulator Controls */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
-        paddingTop: '16px',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-          💡 <strong>How to use:</strong> Open WhatsApp or Chrome, swipe down Quick Settings, tap <strong>AutoScroll</strong> to turn ON.
+      {/* Supported Application Inspection Registry */}
+      <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', padding: '20px', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '20px' }}>
+        <h4 style={{ fontSize: '0.95rem', fontWeight: '800', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Layers size={18} color="#a855f7" />
+          Supported Third-Party Applications Capabilities
+        </h4>
+
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
+          {POPULAR_APP_REGISTRY.slice(0, 5).map((app) => (
+            <button
+              key={app.packageName}
+              onClick={() => setSelectedApp(app)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '8px',
+                backgroundColor: selectedApp.packageName === app.packageName ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255,255,255,0.04)',
+                border: selectedApp.packageName === app.packageName ? '1px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
+                color: selectedApp.packageName === app.packageName ? '#60a5fa' : '#94a3b8',
+                fontSize: '0.78rem',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              {app.appName}
+            </button>
+          ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={() => setSimulatedFallbackOpen(!simulatedFallbackOpen)}
-            style={{
-              padding: '8px 14px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.08)',
-              color: '#cbd5e1',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              fontSize: '0.78rem',
-              fontWeight: '700',
-              cursor: 'pointer'
-            }}
-          >
-            Preview Fallback Dialog
-          </button>
-
-          <button
-            onClick={onOpenSettings}
-            style={{
-              padding: '8px 14px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(59, 130, 246, 0.2)',
-              color: '#60a5fa',
-              border: '1px solid rgba(59, 130, 246, 0.4)',
-              fontSize: '0.78rem',
-              fontWeight: '700',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <Settings size={14} /> Universal Settings
-          </button>
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: '800' }}>{selectedApp.appName} ({selectedApp.packageName})</span>
+            <span style={{
+              fontSize: '0.68rem',
+              fontWeight: '800',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              backgroundColor: selectedApp.capability === 'FULL' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)',
+              color: selectedApp.capability === 'FULL' ? '#4ade80' : '#facc15'
+            }}>
+              {selectedApp.capability} CAPABILITY
+            </span>
+          </div>
+          <p style={{ fontSize: '0.78rem', color: '#cbd5e1', margin: '4px 0 8px 0' }}>
+            {selectedApp.notes}
+          </p>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'flex', gap: '12px' }}>
+            <span>Accessibility Scroll: <strong style={{ color: '#4ade80' }}>ACTION_SCROLL_FORWARD</strong></span>
+            <span>Fallback Gesture: <strong style={{ color: '#4ade80' }}>PROGRAMMATIC SWIPE</strong></span>
+          </div>
         </div>
       </div>
 
-      {/* Simulated Fallback Dialog Popup */}
-      {simulatedFallbackOpen && (
-        <div style={{
-          marginTop: '16px',
-          padding: '16px',
-          borderRadius: '14px',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '12px'
-        }}>
-          <AlertTriangle size={20} color="#f87171" style={{ marginTop: '2px' }} />
-          <div style={{ flex: 1 }}>
-            <h5 style={{ fontSize: '0.9rem', fontWeight: '800', margin: 0, color: '#f87171' }}>
-              Direct AutoScroll isn't supported in this app.
-            </h5>
-            <p style={{ fontSize: '0.8rem', color: '#cbd5e1', margin: '4px 0 12px 0' }}>
-              This view doesn't expose a standard scroll container. Choose a fallback option below to continue reading with AutoScroll AI:
-            </p>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => {
-                  setSimulatedFallbackOpen(false);
-                  onLaunchReaderWithContent({
-                    id: 'fallback-shared',
-                    title: 'Shared Application Content',
-                    totalWords: 340,
-                    avgDifficulty: 0.28,
-                    fileType: 'Share',
-                    nodes: [
-                      { id: 'f1', type: 'h2', text: 'Content Imported via Universal Fallback' },
-                      { id: 'f2', type: 'p', text: 'This text was automatically extracted via fallback share sheet. AutoScroll engine will now smoothly scroll this content with your personalized ML speed profile.' }
-                    ]
-                  });
-                }}
-                style={{ padding: '6px 12px', borderRadius: '6px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-              >
-                <Share2 size={12} /> Share to AutoScroll
-              </button>
-              <button
-                onClick={() => setSimulatedFallbackOpen(false)}
-                style={{ padding: '6px 12px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-              >
-                <Copy size={12} /> Copy Text
-              </button>
-              <button
-                onClick={() => setSimulatedFallbackOpen(false)}
-                style={{ padding: '6px 12px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-              >
-                <FileText size={12} /> Import File
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Footer controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+          💡 On Android, swipe down Quick Settings and tap <strong>AutoScroll</strong> to launch floating control overlay.
+        </span>
+
+        <button
+          onClick={onOpenSettings}
+          style={{
+            padding: '8px 14px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            color: '#60a5fa',
+            border: '1px solid rgba(59, 130, 246, 0.4)',
+            fontSize: '0.78rem',
+            fontWeight: '700',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <Settings size={14} /> Android Preferences
+        </button>
+      </div>
     </div>
   );
 }

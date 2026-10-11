@@ -127,16 +127,40 @@
       "contentType": "blog",
       "userBaselineWpm": 301,
       "targetWpm": 301
+    },
+    {
+      "wordCount": 300,
+      "charCount": 1650,
+      "fontSize": 18,
+      "contentType": "news",
+      "userBaselineWpm": 230,
+      "targetWpm": 235
+    },
+    {
+      "wordCount": 400,
+      "charCount": 2000,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 220,
+      "targetWpm": 240
+    },
+    {
+      "wordCount": 250,
+      "charCount": 1350,
+      "fontSize": 16,
+      "contentType": "blog",
+      "userBaselineWpm": 235,
+      "targetWpm": 235
     }
   ],
   "weights": {
-    "intercept": 47,
-    "wBaseline": 0.9447470448799612,
+    "intercept": 57,
+    "wBaseline": 0.9088391221925909,
     "wFont": 1,
     "wDensity": -10,
     "wContent": 25
   },
-  "userBaselineWpm": 301,
+  "userBaselineWpm": 235,
   "rSquared": 0.72,
-  "lastTrainedAt": "2026-08-04T17:45:21.337Z"
+  "lastTrainedAt": "2026-08-24T06:48:15.319Z"
 }

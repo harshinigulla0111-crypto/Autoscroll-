@@ -1,0 +1,8 @@
+app/
+gradle/
+build_work/
+scripts/tools/
+*.apk
+*.aab
+*.pdf
+.gradle/

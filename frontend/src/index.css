@@ -185,3 +185,26 @@ input, select, textarea {
 .spin {
   animation: spin 1s linear infinite;
 }
+
+/* Responsive Styles for Mobile & Tablet Viewports */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .glass-panel {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+
+  /* Reading Canvas Padding Adaptation */
+  div[style*="padding: 44px"] {
+    padding: 20px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Navigation Header adjustments */
+  header div[style*="gap: 20px"] {
+    gap: 8px !important;
+  }
+}

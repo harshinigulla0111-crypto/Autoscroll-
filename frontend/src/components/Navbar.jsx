@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, BookOpen, Share2, Award, ShieldCheck, Sparkles, RefreshCw, Download, Smartphone, Zap } from 'lucide-react';
+import { Brain, BookOpen, Share2, Award, ShieldCheck, Sparkles, RefreshCw, Download, Smartphone, Zap, User } from 'lucide-react';
 
 export default function Navbar({
   activeTab,
@@ -7,6 +7,8 @@ export default function Navbar({
   userBaselineWpm,
   onResetOnboarding,
   onOpenDownloadApk,
+  user = null,
+  onOpenAuth,
   confidencePercent = 85,
   isUniversalEnabled = true
 }) {
@@ -128,8 +130,28 @@ export default function Navbar({
         </button>
       </nav>
 
-      {/* Right User Stats, Download APK & Calibration Reset */}
+      {/* Right User Stats, Auth Button, Download APK & Calibration Reset */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button
+          onClick={onOpenAuth}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '8px 14px',
+            borderRadius: '10px',
+            backgroundColor: user ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+            border: user ? '1px solid rgba(99, 102, 241, 0.5)' : '1px solid rgba(255, 255, 255, 0.15)',
+            color: user ? '#818cf8' : '#ffffff',
+            fontWeight: '700',
+            fontSize: '0.82rem',
+            cursor: 'pointer'
+          }}
+        >
+          <User size={16} />
+          {user ? user.email.split('@')[0] : 'Sign In'}
+        </button>
+
         <button
           onClick={onOpenDownloadApk}
           style={{
@@ -180,3 +202,4 @@ export default function Navbar({
     </header>
   );
 }
+

@@ -103,6 +103,37 @@ fun MainDashboardScreen() {
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
+                        text = "User Account & Authentication",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "JWT Session & Room Local Database Active",
+                        fontSize = 12.sp,
+                        color = Color.LightGray
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { /* Open auth dialog or web view auth */ },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF10B981)
+                        )
+                    ) {
+                        Text("Account Signed In (Session Active)")
+                    }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
                         text = "Quick Controls",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
